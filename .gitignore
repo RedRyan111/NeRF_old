@@ -2,3 +2,4 @@ tiny_nerf_data.npz
 .idea/
 __pycache__/
 example_images/
+testing.ipynb

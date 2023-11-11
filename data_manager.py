@@ -22,6 +22,9 @@ class DataManager:
         self.print_example_image_data()
         self.print_data_camera_poses_and_directions()
 
+    def get_example_index(self):
+        return random.randint(0, self.num_of_images)
+
     def print_data_info(self):
         print(f'Images shape: {self.images.shape}')
         print(f'Poses shape: {self.poses.shape}')
