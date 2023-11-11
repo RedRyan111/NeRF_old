@@ -31,7 +31,7 @@ class DataManager:
         print(f'Focal length: {self.focal}')
 
     def print_example_image_data(self):
-        rand_ind = random.randint(0, self.num_of_images)
+        rand_ind = random.randint(0, self.num_of_images-1)
         example_img = self.images[rand_ind]
         example_pose = self.poses[rand_ind]
         plt.imshow(example_img)
