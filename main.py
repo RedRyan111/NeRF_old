@@ -2,6 +2,7 @@ import torch
 from matplotlib import pyplot as plt
 
 from data_manager import DataManager
+from example_images.positional_encoder import PositionalEncoder
 from sampling import sample_stratified
 from volume_rendering import transform_rays_with_image_orientation, get_rays
 from typing import Optional, Tuple, List, Union, Callable
@@ -49,7 +50,7 @@ near, far = 2., 6.
 perturb = True
 inverse_depth = False
 with torch.no_grad():
-  z_vals = sample_stratified(rays_o, rays_d, near, far, n_samples, perturb=perturb)
+  pts, z_vals = sample_stratified(rays_o, rays_d, near, far, n_samples, perturb=perturb)
 
 print('Input Points')
 print('')
@@ -58,7 +59,7 @@ print(z_vals.shape)
 
 y_vals = torch.zeros_like(z_vals)
 
-z_vals_unperturbed = sample_stratified(rays_o, rays_d, near, far, n_samples, perturb=False)
+_, z_vals_unperturbed = sample_stratified(rays_o, rays_d, near, far, n_samples, perturb=False)
 
 plt.plot(z_vals_unperturbed[0].cpu().numpy(), 1 + y_vals[0].cpu().numpy(), 'b-o')
 plt.plot(z_vals[0].cpu().numpy(), y_vals[0].cpu().numpy(), 'r-o')
@@ -70,3 +71,25 @@ plt.grid(True)
 plt.show()
 
 
+# Create encoders for points and view directions
+encoder = PositionalEncoder(10)
+viewdirs_encoder = PositionalEncoder(4)
+
+# Grab flattened points and view directions
+pts_flattened = pts.reshape(-1, 3)
+viewdirs = rays_d / torch.norm(rays_d, dim=-1, keepdim=True)
+flattened_viewdirs = viewdirs[:, None, ...].expand(pts.shape).reshape((-1, 3))
+
+# Encode inputs
+encoded_points = encoder(pts_flattened)
+encoded_viewdirs = viewdirs_encoder(flattened_viewdirs)
+
+print('Encoded Points')
+print(encoded_points.shape)
+print(torch.min(encoded_points), torch.max(encoded_points), torch.mean(encoded_points))
+print('')
+
+print(encoded_viewdirs.shape)
+print('Encoded Viewdirs')
+print(torch.min(encoded_viewdirs), torch.max(encoded_viewdirs), torch.mean(encoded_viewdirs))
+print('')
